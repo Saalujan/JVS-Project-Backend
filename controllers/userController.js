@@ -102,4 +102,50 @@ const getUserProfile = asyncHandler(async (req, res) => {
   }
 });
 
-export { registerUser, authUser, logoutUser, getAllUsers,getUserProfile };
+const updateUserProfile = asyncHandler(async (req, res) => {
+  let _id = req.params.id
+  const user = await User.findById(_id)
+  if (user) {
+      user.name = req.body.name || user.name;
+      user.email = req.body.email || user.email;
+      user.phoneNumber = req.body.phoneNumber || user.phoneNumber;
+      user.profilePic = req.body.profilePic || user.profilePic;
+
+      if (req.body.password) {
+          user.password = req.body.password;
+      }
+
+
+      const updatedUser = await user.save();
+
+      res.json({
+        data: {
+          _id: updatedUser._id,
+          name: updatedUser.name,
+          email: updatedUser.email,
+          phoneNumber: updatedUser.phoneNumber,
+          profilePic: updatedUser.profilePic,
+          creationDate: user.creationDate,
+        },
+        message:"User Updated Succesfully"
+      });
+  } else {
+      res.status(404);
+      throw new Error('User not found');
+  }
+});
+
+const deleteUser = asyncHandler(async (req, res) => {
+  try {
+    const { id } = req.params;
+    const user = await User.findByIdAndDelete(id);
+    if (!user) {
+      return res.status(404).json({ message: "User not Found !" });
+    }
+    res.status(200).json({ message: "Userk Deleted Successfully !" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+})
+
+export { registerUser, authUser, logoutUser, getAllUsers, getUserProfile,updateUserProfile,deleteUser };
