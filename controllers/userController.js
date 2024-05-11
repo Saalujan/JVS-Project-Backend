@@ -65,4 +65,41 @@ const authUser = asyncHandler(async (req, res) => {
   res.status(401).json({ message: "Email or password is incorrect" });
 });
 
-export { registerUser, authUser };
+const logoutUser = asyncHandler(async (req, res) => {
+  res.cookie("jwt", null, {
+    httpOnly: true,
+    expires: new Date(0),
+    // secure: true,
+    // sameSite:'strict',
+  });
+
+  res.status(200).json({ message: "Logout Successfully" });
+});
+
+const getAllUsers = asyncHandler(async (req, res) => {
+  try {
+    const users = await User.find({});
+    if (users.length === 0) {
+      return res.status(404).json({ message: "User is Empty !" });
+    }
+    res.status(200).json(users);
+  } catch (err) {
+    console.error("Failed to fetch users from MongoDB:", err);
+    res.status(500).json({ message: err.message });
+  }
+});
+
+const getUserProfile = asyncHandler(async (req, res) => {
+  try {
+    let _id = req.params.id;
+    const user = await User.findById(_id);
+    if (!user) {
+      return res.status(404).json({ message: "User Not Found !" });
+    }
+    res.status(200).json(user);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+export { registerUser, authUser, logoutUser, getAllUsers,getUserProfile };
