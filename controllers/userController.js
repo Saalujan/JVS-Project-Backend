@@ -6,7 +6,7 @@ const registerUser = asyncHandler(async (req, res) => {
   const { name, email, password, phoneNumber, profilePic, role } = req.body;
 
   const userExists = await User.findOne({ email });
-
+  
   if (userExists) {
     res.status(400);
     throw new Error("User already exists");
@@ -151,7 +151,7 @@ const deleteUser = asyncHandler(async (req, res) => {
     if (!user) {
       return res.status(404).json({ message: "User not Found !" });
     }
-    res.status(200).json({ message: "Userk Deleted Successfully !" });
+    res.status(200).json({ message: "User Deleted Successfully !" });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
