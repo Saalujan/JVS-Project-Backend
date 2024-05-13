@@ -39,9 +39,15 @@ const registerUser = asyncHandler(async (req, res) => {
 });
 
 const authUser = asyncHandler(async (req, res) => {
+  const token = req.headers.authorization;
   const { username, password } = req.body;
-
-  if (/\S+@\S+\.\S+/.test(username)) {
+  if (token) {
+    return res.status(200).json({ message: "logged in successfully" });
+  } else if (username && password) {
+    if (!/\S+@\S+\.\S+/.test(username)) {
+      res.status(400).json({ message: "Enter valid email" });
+      return;
+    }
     const user = await User.findOne({ email: username });
 
     if (user && (await user.matchPassword(password))) {
@@ -59,10 +65,14 @@ const authUser = asyncHandler(async (req, res) => {
         },
         message: "logged in successfully",
       });
+    } else {
+      res.status(401).json({ message: "Email or password is incorrect" });
     }
+  } else {
+    username
+      ? res.status(400).json({ message: "password required" })
+      : res.status(400).json({ message: "username required" });
   }
-
-  res.status(401).json({ message: "Email or password is incorrect" });
 });
 
 const logoutUser = asyncHandler(async (req, res) => {
@@ -103,35 +113,34 @@ const getUserProfile = asyncHandler(async (req, res) => {
 });
 
 const updateUserProfile = asyncHandler(async (req, res) => {
-  let _id = req.params.id
-  const user = await User.findById(_id)
+  let _id = req.params.id;
+  const user = await User.findById(_id);
   if (user) {
-      user.name = req.body.name || user.name;
-      user.email = req.body.email || user.email;
-      user.phoneNumber = req.body.phoneNumber || user.phoneNumber;
-      user.profilePic = req.body.profilePic || user.profilePic;
+    user.name = req.body.name || user.name;
+    user.email = req.body.email || user.email;
+    user.phoneNumber = req.body.phoneNumber || user.phoneNumber;
+    user.profilePic = req.body.profilePic || user.profilePic;
 
-      if (req.body.password) {
-          user.password = req.body.password;
-      }
+    if (req.body.password) {
+      user.password = req.body.password;
+    }
 
+    const updatedUser = await user.save();
 
-      const updatedUser = await user.save();
-
-      res.json({
-        data: {
-          _id: updatedUser._id,
-          name: updatedUser.name,
-          email: updatedUser.email,
-          phoneNumber: updatedUser.phoneNumber,
-          profilePic: updatedUser.profilePic,
-          creationDate: user.creationDate,
-        },
-        message:"User Updated Succesfully"
-      });
+    res.json({
+      data: {
+        _id: updatedUser._id,
+        name: updatedUser.name,
+        email: updatedUser.email,
+        phoneNumber: updatedUser.phoneNumber,
+        profilePic: updatedUser.profilePic,
+        creationDate: user.creationDate,
+      },
+      message: "User Updated Succesfully",
+    });
   } else {
-      res.status(404);
-      throw new Error('User not found');
+    res.status(404);
+    throw new Error("User not found");
   }
 });
 
@@ -146,6 +155,14 @@ const deleteUser = asyncHandler(async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
-})
+});
 
-export { registerUser, authUser, logoutUser, getAllUsers, getUserProfile,updateUserProfile,deleteUser };
+export {
+  registerUser,
+  authUser,
+  logoutUser,
+  getAllUsers,
+  getUserProfile,
+  updateUserProfile,
+  deleteUser,
+};
