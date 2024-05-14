@@ -6,7 +6,7 @@ const registerUser = asyncHandler(async (req, res) => {
   const { name, email, password, phoneNumber, profilePic, role } = req.body;
 
   const userExists = await User.findOne({ email });
-  
+
   if (userExists) {
     res.status(400);
     throw new Error("User already exists");
@@ -116,6 +116,13 @@ const updateUserProfile = asyncHandler(async (req, res) => {
   let _id = req.params.id;
   const user = await User.findById(_id);
   if (user) {
+    const originalUserData = {
+      name: user.name,
+      email: user.email,
+      phoneNumber: user.phoneNumber,
+      profilePic: user.profilePic,
+    };
+
     user.name = req.body.name || user.name;
     user.email = req.body.email || user.email;
     user.phoneNumber = req.body.phoneNumber || user.phoneNumber;
@@ -125,19 +132,29 @@ const updateUserProfile = asyncHandler(async (req, res) => {
       user.password = req.body.password;
     }
 
-    const updatedUser = await user.save();
+    const isUserDataChanged =
+      Object.keys(originalUserData).some(key => user[key] !== originalUserData[key]) ||
+      (req.body.password && req.body.password !== user.password);
+      
+    if (isUserDataChanged) {
+      const updatedUser = await user.save();
 
-    res.json({
-      data: {
-        _id: updatedUser._id,
-        name: updatedUser.name,
-        email: updatedUser.email,
-        phoneNumber: updatedUser.phoneNumber,
-        profilePic: updatedUser.profilePic,
-        creationDate: user.creationDate,
-      },
-      message: "User Updated Succesfully",
-    });
+      res.json({
+        data: {
+          _id: updatedUser._id,
+          name: updatedUser.name,
+          email: updatedUser.email,
+          phoneNumber: updatedUser.phoneNumber,
+          profilePic: updatedUser.profilePic,
+          creationDate: user.creationDate,
+        },
+        message: "User Updated Succesfully",
+      });
+    } else {
+      return res.status(201).json({
+        message: "No changes made",
+      });
+    }
   } else {
     res.status(404);
     throw new Error("User not found");
