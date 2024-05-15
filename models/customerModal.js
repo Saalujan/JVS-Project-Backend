@@ -39,11 +39,11 @@ const customerSchema = mongoose.Schema(
     },
     city: {
       type: String,
-      required: false,
+      required: true,
     },
     gender: {
       type: String,
-      required: false,
+      required: true,
     },
     phoneNo: {
       type: String,
@@ -52,6 +52,10 @@ const customerSchema = mongoose.Schema(
     profilePic: {
       type: String,
       required: false,
+    },
+    description:{
+      type:String,
+      required:false,
     },
     creationDate: {
       type: Date,

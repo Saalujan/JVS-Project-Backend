@@ -16,7 +16,7 @@ const registerCustomer = asyncHandler(async (req, res) => {
     phoneNo,
     city,
     role,
-    
+    description
   } = req.body;
 
   const customerExists = await Customer.findOne({ email });
@@ -39,6 +39,7 @@ const registerCustomer = asyncHandler(async (req, res) => {
     phoneNo,
     city,
     role,
+    description
   });
 
   if (customer) {
