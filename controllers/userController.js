@@ -121,6 +121,7 @@ const updateUserProfile = asyncHandler(async (req, res) => {
       email: user.email,
       phoneNumber: user.phoneNumber,
       profilePic: user.profilePic,
+      password:user.password
     };
 
     user.name = req.body.name || user.name;
