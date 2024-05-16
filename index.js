@@ -7,6 +7,7 @@ import { errorHandler, notFound } from "./middleware/errorMiddleware.js";
 
 import userRoutes from "./routes/userRoutes.js";
 import customerRoutes from "./routes/customerRoutes.js";
+import vehicleRoutes from "./routes/vehicleRoutes.js";
 
 
 dotenv.config();
@@ -21,6 +22,7 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use("/api/users", userRoutes);
 app.use("/api/customers", customerRoutes);
+app.use("/api/vehicles", vehicleRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

@@ -56,7 +56,7 @@ const registerCustomer = asyncHandler(async (req, res) => {
     sendRegistrationEmail(email,fname,password);
     res.status(200).json({ data: customer, message: "Registered Succesfully" });
   } else {
-    res.status(400);
+    res.status(401);
     throw new Error("Invalid user Data");
   }
 });

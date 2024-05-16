@@ -33,7 +33,7 @@ const registerUser = asyncHandler(async (req, res) => {
       creationDate: user.creationDate,
     });
   } else {
-    res.status(400);
+    res.status(401);
     throw new Error("Invalid user Data");
   }
 });
