@@ -90,6 +90,10 @@ const vehicleSchema = mongoose.Schema({
     type: [String],
     required: false,
   },
+  status: {
+    type: String,
+    default: "Requested",
+  },
 });
 
 const Vehicle = mongoose.model("Vehicle", vehicleSchema);
