@@ -132,9 +132,60 @@ const sendRegistrationEmail = async (email, fname, password) => {
 };
 
 
+const authCustomer = asyncHandler(async (req, res) => {
+  const token = req.headers.authorization;
+  const { username, password } = req.body;
+  if (token) {
+    return res.status(200).json({ message: "logged in successfully" });
+  } else if (username && password) {
+    if (!/\S+@\S+\.\S+/.test(username)) {
+      res.status(400).json({ message: "Enter valid email" });
+      return;
+    }
+    const customer = await Customer.findOne({ email: username });
+
+    if (customer && (await customer.matchPassword(password))) {
+      let token = generateToken(res, customer._id);
+      return res.status(200).json({
+        data: {
+          token: token,
+          _id: customer._id,
+          name:customer.name,
+          email: customer.email,
+          phoneNumber: customer.phoneNumber,
+          role: customer.role,
+          profilePic: customer.profilePic,
+          creationDate: customer.creationDate,
+        },
+        message: "logged in successfully",
+      });
+    } else {
+      res.status(401).json({ message: "Email or password is incorrect" });
+    }
+  } else {
+    username
+      ? res.status(400).json({ message: "password required" })
+      : res.status(400).json({ message: "username required" });
+  }
+});
+
+const logoutCustomer = asyncHandler(async (req, res) => {
+  res.cookie("jwt", null, {
+    httpOnly: true,
+    expires: new Date(0),
+    // secure: true,
+    // sameSite:'strict',
+  });
+
+  res.status(200).json({ message: "Logout Successfully" });
+});
+
+
 export {
   registerCustomer,
   getAllCustomers,
   getCustomerProfile,
   deleteCustomer,
+  authCustomer,
+  logoutCustomer
 };
