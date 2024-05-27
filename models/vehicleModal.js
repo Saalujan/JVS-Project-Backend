@@ -94,6 +94,11 @@ const vehicleSchema = mongoose.Schema({
     type: String,
     default: "Requested",
   },
+  customerId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref:"Customer",
+    required: false,
+},
 });
 
 const Vehicle = mongoose.model("Vehicle", vehicleSchema);

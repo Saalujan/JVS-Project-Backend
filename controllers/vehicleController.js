@@ -26,7 +26,10 @@ const addVehicle = asyncHandler(async (req, res) => {
     documents,
     image,
     status,
+    customerId,
   } = req.body;
+
+
 
   const vehicleExists = await Vehicle.findOne({ registerno });
 
@@ -59,6 +62,7 @@ const addVehicle = asyncHandler(async (req, res) => {
     documents,
     image,
     status,
+    customerId,
   });
 
   if (vehicle) {
@@ -85,18 +89,30 @@ const getAllVehciles = asyncHandler(async (req, res) => {
   }
 });
 
+const vehicleDetail = asyncHandler(async (req, res) => {
+  try {
+    let _id = req.params.id;
+    const vehicle = await Vehicle.findById(_id);
+    if (!vehicle) {
+      return res.status(404).json({ message: "Vehicle Not Found !" });
+    }
+    res.status(200).json(vehicle);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
 
-const vehicleDetail =asyncHandler(async (req,res)=>{
-    try {
-        let _id = req.params.id;
-        const vehicle = await Vehicle.findById(_id);
-        if (!vehicle) {
-          return res.status(404).json({ message: "Vehicle Not Found !" });
-        }
-        res.status(200).json(vehicle);
-      } catch (error) {
-        res.status(500).json({ message: error.message });
-      }
-})
+const deleteVehicle = asyncHandler(async (req, res) => {
+  try {
+    const { id } = req.params;
+    const vehicle = await Vehicle.findByIdAndDelete(id);
+    if (!vehicle) {
+      return res.status(404).json({ message: "Vehicle not Found !" });
+    }
+    res.status(200).json({ message: "Vehicle Deleted Successfully !" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
 
-export { addVehicle, getAllVehciles,vehicleDetail };
+export { addVehicle, getAllVehciles, vehicleDetail, deleteVehicle };
