@@ -23,12 +23,12 @@ const salesSchema = mongoose.Schema(
     customerId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Customer",
-      required: false,
+      required: true,
     },
     vehicleId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Vehicle",
-      required: false,
+      required: true,
     },
     price: {
       type: Number,
