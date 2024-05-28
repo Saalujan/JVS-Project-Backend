@@ -191,71 +191,43 @@ const logoutCustomer = asyncHandler(async (req, res) => {
 
 
 const updateCustomerProfile = asyncHandler(async (req, res) => {
-  let _id = req.params.id;
+  const _id = req.params.id;
   const customer = await Customer.findById(_id);
-  if (customer) {
-    const originalcustomerData = {
-      fname: customer.fname,
-      lname: customer.lname,
-      email: customer.email,
-      password: customer.password,
-      profilePic: customer.profilePic,
-      dob: customer.dob,
-      address: customer.address,
-      nic: customer.nic,
-      phoneNo: customer.phoneNo,
-      city: customer.city,
-      description: customer.description,
-    };
 
-    customer.fname = req.body.fname || customer.fname;
-    customer.lname = req.body.lname || customer.lname;
-    customer.email = req.body.email || customer.email;
-    customer.profilePic = req.body.profilePic || customer.profilePic;
-    customer.dob = req.body.dob || customer.dob;
-    customer.address = req.body.address || customer.address;
-    customer.nic = req.body.nic || customer.nic;
-    customer.phoneNo = req.body.phoneNo || customer.phoneNo;
-    customer.city = req.body.city || customer.city;
-    customer.description = req.body.description || customer.description;
-   
-    if (req.body.password) {
-      customer.password = req.body.password;
-    }
-
-    const iscustomerDataChanged =
-      Object.keys(originalcustomerData).some(key => customer[key] !== originalcustomerData[key]) ||
-      (req.body.password && req.body.password !== customer.password);
-      
-    if (iscustomerDataChanged) {
-      const updatedcustomer = await customer.save();
-
-      res.json({
-        data: {
-          _id: updatedcustomer._id,
-          fname: updatedcustomer.fname,
-          lname: updatedcustomer.lname,
-          email: updatedcustomer.email,
-          profilePic: updatedcustomer.profilePic,
-          dob: updatedcustomer.dob,
-          address: updatedcustomer.address,
-          nic: updatedcustomer.nic,
-          phoneNo: updatedcustomer.phoneNo,
-          city: updatedcustomer.city,
-          description: updatedcustomer.description,
-        },
-        message: "customer Updated Succesfully",
-      });
-    } else {
-      return res.status(201).json({
-        message: "No changes made",
-      });
-    }
-  } else {
+  if (!customer) {
     res.status(404);
-    throw new Error("customer not found");
+    throw new Error("Customer not found");
+  }
+
+  const originalCustomerData = { ...customer.toObject() };
+  const updateFields = [
+    "fname", "lname", "email", "profilePic", "dob", "address",
+    "nic", "phoneNo", "city", "description"
+  ];
+
+  updateFields.forEach(field => {
+    customer[field] = req.body[field] || customer[field];
+  });
+
+  if (req.body.password) {
+    customer.password = req.body.password;
+  }
+  
+  const isCustomerDataChanged = updateFields.some(key => customer[key] !== originalCustomerData[key]) || (req.body.password && req.body.password !== customer.password);
+
+  if (isCustomerDataChanged) {
+    const updatedCustomer = await customer.save();
+    res.json({
+      data: { ...updatedCustomer.toObject() },
+      message: "Customer Updated Successfully",
+    });
+  } else {
+    res.status(201).json({
+      message: "No changes made",
+    });
   }
 });
+
 
 export {
   registerCustomer,
