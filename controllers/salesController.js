@@ -39,4 +39,18 @@ const addSales = asyncHandler(async (req, res) => {
 });
 
 
-export {addSales};
+const getAllSales = asyncHandler(async (req, res) => {
+    try {
+      const sales = await Sales.find({});
+      if (sales.length === 0) {
+        return res.status(404).json({ message: "Sales Details is Empty !" });
+      }
+      res.status(200).json(sales);
+    } catch (err) {
+      console.error("Failed to fetch Sales from MongoDB:", err);
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+
+export {addSales,getAllSales};
