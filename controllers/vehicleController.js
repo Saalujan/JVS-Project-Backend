@@ -1,5 +1,8 @@
 import asyncHandler from "express-async-handler";
 import Vehicle from "../models/vehicleModal.js";
+import Customer from "../models/customerModal.js";
+import { sendVehicleAddEmail } from "../utils/customerMail.js";
+
 
 const addVehicle = asyncHandler(async (req, res) => {
   const {
@@ -64,6 +67,10 @@ const addVehicle = asyncHandler(async (req, res) => {
   });
 
   if (vehicle) {
+    const customer = await Customer.findById(customerId);
+    if (customer) {
+      await sendVehicleAddEmail(customer.email, customer.fname, vehicle);
+    }
     res.status(200).json({
       data: vehicle,
       message: "Vehicle added Sucessfully",
@@ -125,19 +132,38 @@ const updateVehicle = asyncHandler(async (req, res) => {
   const originalVehicleData = { ...vehicle.toObject() };
 
   const updateFields = [
-    "name", "registerno", "type", "brand", "model", "price", 
-    "ownership", "transmission", "gear", "color", "yom", "fuel", 
-    "fuelcap", "power", "mileage", "noofdoors", "noofseats", 
-    "district", "description", "features", "documents", "image", 
-    "status"
+    "name",
+    "registerno",
+    "type",
+    "brand",
+    "model",
+    "price",
+    "ownership",
+    "transmission",
+    "gear",
+    "color",
+    "yom",
+    "fuel",
+    "fuelcap",
+    "power",
+    "mileage",
+    "noofdoors",
+    "noofseats",
+    "district",
+    "description",
+    "features",
+    "documents",
+    "image",
+    "status",
   ];
 
-  updateFields.forEach(field => {
+  updateFields.forEach((field) => {
     vehicle[field] = req.body[field] || vehicle[field];
   });
 
-  const isVehicleDataChanged = updateFields.some(key => vehicle[key] !== originalVehicleData[key]);
-
+  const isVehicleDataChanged = updateFields.some(
+    (key) => vehicle[key] !== originalVehicleData[key]
+  );
   if (isVehicleDataChanged) {
     const updatedVehicle = await vehicle.save();
     res.json({
@@ -152,4 +178,11 @@ const updateVehicle = asyncHandler(async (req, res) => {
 });
 
 
-export { addVehicle, getAllVehciles, vehicleDetail, deleteVehicle,updateVehicle };
+
+export {
+  addVehicle,
+  getAllVehciles,
+  vehicleDetail,
+  deleteVehicle,
+  updateVehicle,
+};
