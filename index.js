@@ -8,7 +8,8 @@ import { errorHandler, notFound } from "./middleware/errorMiddleware.js";
 import userRoutes from "./routes/userRoutes.js";
 import customerRoutes from "./routes/customerRoutes.js";
 import vehicleRoutes from "./routes/vehicleRoutes.js";
-import salesRoutes from "./routes/salesRoutes.js"
+import salesRoutes from "./routes/salesRoutes.js";
+import contentRoutes from "./routes/contentRoutes.js"
 
 dotenv.config();
 connectDB();
@@ -24,6 +25,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/customers", customerRoutes);
 app.use("/api/vehicles", vehicleRoutes);
 app.use("/api/sales", salesRoutes);
+app.use("/api/content", contentRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

@@ -1,7 +1,7 @@
 import asyncHandler from "express-async-handler";
 import Customer from "../models/customerModal.js";
 import Vehicle from "../models/vehicleModal.js";
-import Sales from "../models/SalesModel.js";
+import Sales from "../models/saleModel.js";
 
 const addSales = asyncHandler(async (req, res) => {
   const { price, email, registerno, status, description, documents } = req.body;
