@@ -9,7 +9,7 @@ import userRoutes from "./routes/userRoutes.js";
 import customerRoutes from "./routes/customerRoutes.js";
 import vehicleRoutes from "./routes/vehicleRoutes.js";
 import salesRoutes from "./routes/salesRoutes.js";
-import contentRoutes from "./routes/contentRoutes.js"
+import contentRoutes from "./routes/contentRoutes.js";
 
 dotenv.config();
 connectDB();
