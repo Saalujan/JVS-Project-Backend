@@ -18,6 +18,11 @@ const addSales = asyncHandler(async (req, res) => {
     throw new Error("Vehicle not found");
   }
 
+  if (vehicle.status === "Sold") {
+    res.status(400).json({ message: "This vehicle is already sold" });
+    return;
+  }
+
   const sales = await Sales.create({
     price,
     customerId: customer._id,
