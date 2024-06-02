@@ -43,8 +43,11 @@ const updateContent = asyncHandler(async (req, res) => {
     content.content = req.body.content || content.content;
     content.description = req.body.description || content.description;
     content.status = req.body.status || content.status;
-    const updatedContent = await fees.save();
-    res.json(updatedContent);
+    const updatedContent = await content.save();
+    res.json({
+      data: {...updatedContent},
+      message: "Content Updated Successfully",
+    });
   } else {
     res.status(404);
     throw new Error("Content not found");
