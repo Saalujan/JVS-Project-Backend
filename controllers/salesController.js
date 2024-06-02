@@ -43,19 +43,48 @@ const addSales = asyncHandler(async (req, res) => {
   }
 });
 
-
 const getAllSales = asyncHandler(async (req, res) => {
-    try {
-      const sales = await Sales.find({});
-      if (sales.length === 0) {
-        return res.status(404).json({ message: "Sales Details is Empty !" });
-      }
-      res.status(200).json(sales);
-    } catch (err) {
-      console.error("Failed to fetch Sales from MongoDB:", err);
-      res.status(500).json({ message: err.message });
+  try {
+    const sales = await Sales.find({});
+    if (sales.length === 0) {
+      return res.status(404).json({ message: "Sales Details is Empty !" });
     }
-  });
+    res.status(200).json(sales);
+  } catch (err) {
+    console.error("Failed to fetch Sales from MongoDB:", err);
+    res.status(500).json({ message: err.message });
+  }
+});
+
+const deleteSales = asyncHandler(async (req, res) => {
+  try {
+    const { id } = req.params;
+    const sales = await Sales.findByIdAndDelete(id);
+    if (!sales) {
+      return res.status(404).json({ message: "Sales not Found !" });
+    }
+    res.status(200).json({ message: "Sales Deleted Successfully !" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
 
 
-export {addSales,getAllSales};
+const updateSales = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const sales = await Sales.findById(id);
+
+  if (sales) {
+    sales.price = req.body.price || sales.price;
+    sales.description = req.body.description || sales.description;
+    sales.status = req.body.status || sales.status;
+    sales.documents = req.body.documents || sales.documents;
+    const updatedSales = await sales.save();
+    res.status(200).json(updatedSales);
+  } else {
+    res.status(404);
+    throw new Error("Sales not found");
+  }
+});
+
+export { addSales, getAllSales, deleteSales,updateSales };

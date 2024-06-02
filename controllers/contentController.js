@@ -14,7 +14,7 @@ const addContent = asyncHandler(async (req, res) => {
   if (contents) {
     res.status(200).json({
       data: contents,
-      message: "Conetent added Sucessfully",
+      message: "Content added Sucessfully",
     });
   } else {
     res.status(401);
