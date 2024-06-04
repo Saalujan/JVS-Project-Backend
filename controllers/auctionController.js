@@ -50,4 +50,17 @@ const getAllAuctions = asyncHandler(async (req, res) => {
   }
 });
 
-export { addAuction, getAllAuctions };
+const deleteAuction = asyncHandler(async (req, res) => {
+  try {
+    const { id } = req.params;
+    const auction = await Auction.findByIdAndDelete(id);
+    if (!auction) {
+      return res.status(404).json({ message: "Auction not Found !" });
+    }
+    res.status(200).json({ message: "Auction Detail Deleted Successfully !" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+export { addAuction, getAllAuctions, deleteAuction };
