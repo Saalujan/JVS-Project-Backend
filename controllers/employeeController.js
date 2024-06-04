@@ -1,9 +1,11 @@
 import asyncHandler from "express-async-handler";
 import generateToken from "../utils/generateToken.js";
 import Employee from "../models/employeeModel.js";
+import { sendCustomerRegistrationEmail } from "../utils/employeeMail.js";
+import generateRandomPassword from "../utils/passwordUtils.js";
 
 const registerEmployee = asyncHandler(async (req, res) => {
-  const { name, email, password, phoneNumber, profilePic, role } = req.body;
+  const { name, email, phoneNumber, profilePic, role } = req.body;
 
   const employeeExists = await Employee.findOne({ email });
 
@@ -12,10 +14,12 @@ const registerEmployee = asyncHandler(async (req, res) => {
     throw new Error("Employee already exists");
   }
 
+  const generatedPassword = generateRandomPassword();
+
   const employee = await Employee.create({
     name,
     email,
-    password,
+    password: generatedPassword,
     phoneNumber,
     profilePic,
     role,
@@ -23,14 +27,18 @@ const registerEmployee = asyncHandler(async (req, res) => {
 
   if (employee) {
     generateToken(res, employee._id);
-    res.status(201).json({
-      _id: employee._id,
-      name: employee.name,
-      email: employee.email,
-      role: employee.role,
-      phoneNumber: employee.phoneNumber,
-      profilePic: employee.profilePic,
-      creationDate: employee.creationDate,
+    sendCustomerRegistrationEmail(email, name, generatedPassword);
+    res.status(200).json({
+      data: {
+        _id: employee._id,
+        name: employee.name,
+        email: employee.email,
+        role: employee.role,
+        phoneNumber: employee.phoneNumber,
+        profilePic: employee.profilePic,
+        creationDate: employee.creationDate,
+      },
+      message: "Employee Register successfully",
     });
   } else {
     res.status(401);
