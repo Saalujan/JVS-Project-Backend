@@ -10,6 +10,7 @@ import customerRoutes from "./routes/customerRoutes.js";
 import vehicleRoutes from "./routes/vehicleRoutes.js";
 import salesRoutes from "./routes/salesRoutes.js";
 import contentRoutes from "./routes/contentRoutes.js";
+import employeeRoutes from "./routes/employeeRoutes.js";
 
 dotenv.config();
 connectDB();
@@ -26,6 +27,7 @@ app.use("/api/customers", customerRoutes);
 app.use("/api/vehicles", vehicleRoutes);
 app.use("/api/sales", salesRoutes);
 app.use("/api/content", contentRoutes);
+app.use("/api/employees", employeeRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

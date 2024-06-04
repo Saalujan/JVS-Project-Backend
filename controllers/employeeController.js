@@ -1,0 +1,188 @@
+import asyncHandler from "express-async-handler";
+import generateToken from "../utils/generateToken.js";
+import Employee from "../models/employeeModel.js";
+
+const registerEmployee = asyncHandler(async (req, res) => {
+  const { name, email, password, phoneNumber, profilePic, role } = req.body;
+
+  const employeeExists = await Employee.findOne({ email });
+
+  if (employeeExists) {
+    res.status(400);
+    throw new Error("Employee already exists");
+  }
+
+  const employee = await Employee.create({
+    name,
+    email,
+    password,
+    phoneNumber,
+    profilePic,
+    role,
+  });
+
+  if (employee) {
+    generateToken(res, employee._id);
+    res.status(201).json({
+      _id: employee._id,
+      name: employee.name,
+      email: employee.email,
+      role: employee.role,
+      phoneNumber: employee.phoneNumber,
+      profilePic: employee.profilePic,
+      creationDate: employee.creationDate,
+    });
+  } else {
+    res.status(401);
+    throw new Error("Invalid Employee Data");
+  }
+});
+
+const authEmployee = asyncHandler(async (req, res) => {
+  const token = req.headers.authorization;
+  const { username, password } = req.body;
+  if (token) {
+    return res.status(200).json({ message: "logged in successfully" });
+  } else if (username && password) {
+    if (!/\S+@\S+\.\S+/.test(username)) {
+      res.status(400).json({ message: "Enter valid email" });
+      return;
+    }
+    const employee = await Employee.findOne({ email: username });
+
+    if (employee && (await employee.matchPassword(password))) {
+      let token = generateToken(res, user._id);
+      return res.status(200).json({
+        data: {
+          token: token,
+          _id: employee._id,
+          name: employee.name,
+          email: employee.email,
+          phoneNumber: employee.phoneNumber,
+          role: employee.role,
+          profilePic: employee.profilePic,
+          creationDate: employee.creationDate,
+        },
+        message: "logged in successfully",
+      });
+    } else {
+      res.status(401).json({ message: "Email or password is incorrect" });
+    }
+  } else {
+    username
+      ? res.status(400).json({ message: "password required" })
+      : res.status(400).json({ message: "username required" });
+  }
+});
+
+const logoutEmployee = asyncHandler(async (req, res) => {
+  res.cookie("jwt", null, {
+    httpOnly: true,
+    expires: new Date(0),
+    // secure: true,
+    // sameSite:'strict',
+  });
+
+  res.status(200).json({ message: "Logout Successfully" });
+});
+
+const getAllEmployees = asyncHandler(async (req, res) => {
+  try {
+    const employees = await Employee.find({});
+    if (employees.length === 0) {
+      return res.status(404).json({ message: "Employee is Empty !" });
+    }
+    res.status(200).json(employees);
+  } catch (err) {
+    console.error("Failed to fetch Employee from MongoDB:", err);
+    res.status(500).json({ message: err.message });
+  }
+});
+
+const getEmployeeProfile = asyncHandler(async (req, res) => {
+  try {
+    let _id = req.params.id;
+    const employee = await Employee.findById(_id);
+    if (!employee) {
+      return res.status(404).json({ message: "Employee Not Found !" });
+    }
+    res.status(200).json(employee);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+const updateEmployeeProfile = asyncHandler(async (req, res) => {
+  let _id = req.params.id;
+  const employee = await Employee.findById(_id);
+  if (employee) {
+    const originalUserData = {
+      name: employee.name,
+      email: employee.email,
+      phoneNumber: employee.phoneNumber,
+      profilePic: employee.profilePic,
+      password: employee.password,
+    };
+
+    employee.name = req.body.name || employee.name;
+    employee.email = req.body.email || employee.email;
+    employee.phoneNumber = req.body.phoneNumber || employee.phoneNumber;
+    employee.profilePic = req.body.profilePic || employee.profilePic;
+
+    if (req.body.password) {
+      employee.password = req.body.password;
+    }
+
+    const isEmployeeDataChanged =
+      Object.keys(originalEmployeeData).some(
+        (key) => employee[key] !== originalEmployeeData[key]
+      ) ||
+      (req.body.password && req.body.password !== employee.password);
+
+    if (isEmployeeDataChanged) {
+      const updatedEmployee = await employee.save();
+
+      res.json({
+        data: {
+          _id: updatedEmployee._id,
+          name: updatedEmployee.name,
+          email: updatedEmployee.email,
+          phoneNumber: updatedEmployee.phoneNumber,
+          profilePic: updatedEmployee.profilePic,
+          creationDate: updatedEmployee.creationDate,
+        },
+        message: "Employee Updated Succesfully",
+      });
+    } else {
+      return res.status(201).json({
+        message: "No changes made",
+      });
+    }
+  } else {
+    res.status(404);
+    throw new Error("Employee not found");
+  }
+});
+
+const deleteEmployee = asyncHandler(async (req, res) => {
+  try {
+    const { id } = req.params;
+    const employee = await Employee.findByIdAndDelete(id);
+    if (!employee) {
+      return res.status(404).json({ message: "Employee not Found !" });
+    }
+    res.status(200).json({ message: "Employee Deleted Successfully !" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+export {
+  registerEmployee,
+  authEmployee,
+  logoutEmployee,
+  getAllEmployees,
+  getEmployeeProfile,
+  updateEmployeeProfile,
+  deleteEmployee,
+};
