@@ -63,4 +63,52 @@ const deleteAuction = asyncHandler(async (req, res) => {
   }
 });
 
-export { addAuction, getAllAuctions, deleteAuction };
+const auctionInfo = asyncHandler(async (req, res) => {
+  try {
+    let _id = req.params.id;
+    const auction = await Auction.findById(_id);
+    if (!auction) {
+      return res.status(404).json({ message: "Auction Not Found !" });
+    }
+    res.status(200).json(auction);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+const updateAuction = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const { status, customerId, biddingprice } = req.body;
+
+  const auction = await Auction.findById(id);
+
+  if (auction) {
+    if (status) {
+      auction.status = status;
+    }
+
+    if (customerId && biddingprice !== undefined) {
+      auction.biddinghistory.push({
+        customerId: customerId,
+        biddingprice: biddingprice,
+      });
+    }
+
+    const updatedAuction = await auction.save();
+    res.status(200).json({
+      data: updatedAuction,
+      message: "Auction bid Update Successfully"
+    });
+  } else {
+    res.status(404);
+    throw new Error("Auction not found");
+  }
+});
+
+export {
+  addAuction,
+  getAllAuctions,
+  deleteAuction,
+  auctionInfo,
+  updateAuction,
+};
