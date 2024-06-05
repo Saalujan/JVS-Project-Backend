@@ -1,6 +1,8 @@
 import asyncHandler from "express-async-handler";
 import Vehicle from "../models/vehicleModal.js";
 import Auction from "../models/auctionModel.js";
+import Customer from "../models/customerModal.js";
+import { sendBiddingConfirmEmail } from "../utils/customerMail.js";
 
 const addAuction = asyncHandler(async (req, res) => {
   const { bidstartprice, registerno, status, description, startDate, endDate } =
@@ -92,6 +94,11 @@ const updateAuction = asyncHandler(async (req, res) => {
         customerId: customerId,
         biddingprice: biddingprice,
       });
+    }
+
+    const customer = await Customer.findById(customerId);
+    if (customer) {
+      await sendBiddingConfirmEmail(customer.email, customer.fname,biddingprice);
     }
 
     const updatedAuction = await auction.save();

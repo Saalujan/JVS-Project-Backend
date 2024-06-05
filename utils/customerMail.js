@@ -155,9 +155,42 @@ const sendRequestConfirmEmail = async (email, fname) => {
   });
 };
 
+
+const sendBiddingConfirmEmail = async (email, fname,biddingprice) => {
+  return new Promise((resolve, reject) => {
+    const message = `
+      <p style="font-weight: bold;">Dear ${fname},</p>
+      <p style="color:green;font-weight: bold;">Your Bidding Amount is Added</p>
+      <br>
+      <p>Your Bidding Amount is : LKR ${biddingprice}</p>
+      <br>
+      <p>If you have any questions or concerns, please contact us.</p>
+      <p>Regards,<br/>Jaffna Vehicle Spot (PVT) LTD</p>
+    `;
+
+    transporter.sendMail(
+      {
+        from: '"Jaffna Vehicle Spot (PVT) LTD" <healerz763@gmail.com>',
+        to: email,
+        subject: "Bidding Confirmation Notification",
+        html: message,
+      },
+      (error, info) => {
+        if (error) {
+          console.error("Error sending Confirm Request email:", error);
+          reject(error);
+        } else {
+          resolve();
+        }
+      }
+    );
+  });
+};
+
 export {
   sendVehicleAddEmail,
   sendRegistrationEmail,
   sendAccountDeletionEmail,
   sendRequestConfirmEmail,
+  sendBiddingConfirmEmail,
 };
