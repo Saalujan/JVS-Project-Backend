@@ -1,7 +1,7 @@
 import asyncHandler from "express-async-handler";
 import Purchase from "../models/purchaseNotificanModel.js";
 import Customer from "../models/customerModal.js";
-import { sendRequestConfirmEmail } from "../utils/customerMail.js";
+import { sendPurchaseStatusUpdateEmail, sendRequestConfirmEmail } from "../utils/customerMail.js";
 
 const addPurchase = asyncHandler(async (req, res) => {
   const { customerId, vehicleId, status } = req.body;
@@ -53,4 +53,23 @@ const deletePurchase = asyncHandler(async (req, res) => {
   }
 });
 
-export { addPurchase, getAllPurchase,deletePurchase };
+const updatePurchase = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const purchase = await Purchase.findById(id)
+  if (purchase) {
+    purchase.status = req.body.status || purchase.status;
+    const updatedPurchase = await purchase.save();
+    const customer = await Customer.findById(purchase.customerId);
+    if (customer) {
+      await sendPurchaseStatusUpdateEmail(customer.email, customer.fname, purchase.status);
+    }
+    res
+      .status(200)
+      .json({ data: updatedPurchase, message: "Status Change Succesfully" });
+  } else {
+    res.status(404);
+    throw new Error("Purchase not found");
+  }
+});
+
+export { addPurchase, getAllPurchase, deletePurchase, updatePurchase };

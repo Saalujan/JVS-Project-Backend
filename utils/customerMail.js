@@ -187,10 +187,45 @@ const sendBiddingConfirmEmail = async (email, fname,biddingprice) => {
   });
 };
 
+const sendPurchaseStatusUpdateEmail = async (email, fname, status) => {
+  return new Promise((resolve, reject) => {
+    const message = `
+      <p style="font-weight: bold;">Dear ${fname},</p>
+      <p style="color:blue;font-weight: bold;">Your purchase request status has been updated to "${status}".</p>
+      <br>
+      <p>Thank you for your patience. We will continue to keep you informed regarding your purchase request.</p>
+      <br>
+      <p>If you have any questions or concerns, please contact us.</p>
+      <p>Regards,<br/>Jaffna Vehicle Spot (PVT) LTD</p>
+    `;
+
+    transporter.sendMail(
+      {
+        from: '"Jaffna Vehicle Spot (PVT) LTD" <healerz763@gmail.com>',
+        to: email,
+        subject: `Purchase Request Status Update: ${status}`,
+        html: message,
+      },
+      (error, info) => {
+        if (error) {
+          console.error("Error sending purchase status update email:", error);
+          reject(error);
+        } else {
+          console.log("Purchase status update email sent to:", email);
+          console.log("Message sent: %s", info.messageId);
+          resolve();
+        }
+      }
+    );
+  });
+};
+
+
 export {
   sendVehicleAddEmail,
   sendRegistrationEmail,
   sendAccountDeletionEmail,
   sendRequestConfirmEmail,
   sendBiddingConfirmEmail,
+  sendPurchaseStatusUpdateEmail
 };
