@@ -47,9 +47,14 @@ const registerCustomer = asyncHandler(async (req, res) => {
   });
 
   if (customer) {
-    generateToken(res, customer._id);
+    const token = generateToken(res, customer._id);
     sendRegistrationEmail(email, fname, password);
-    res.status(200).json({ data: customer, message: "Registered Succesfully" });
+    res.status(200).json({
+      data: {
+        token: token,
+      },
+      message: "Registered Succesfully",
+    });
   } else {
     res.status(401);
     throw new Error("Invalid user Data");
@@ -181,6 +186,32 @@ const updateCustomerProfile = asyncHandler(async (req, res) => {
   }
 });
 
+const changePassword = asyncHandler(async (req, res) => {
+  const _id = req.customer._id;
+
+  const { currentPassword, newPassword, confirmPassword } = req.body;
+
+  const customer = await Customer.findById(_id);
+
+  if (customer && (await customer.matchPassword(currentPassword || ""))) {
+    if (newPassword) {
+      if (newPassword === confirmPassword) {
+        customer.password = newPassword;
+        await customer.save();
+        res.status(200).json({ message: "Password changed successfully" });
+      } else {
+        res.status(400);
+        throw new Error("new password and confirm password do not match");
+      }
+    } else {
+      throw new Error("Invalid Inputs");
+    }
+  } else {
+    res.status(401);
+    throw new Error("Invalid Old Password");
+  }
+});
+
 const getCustomerProfile = asyncHandler(async (req, res) => {
   try {
     res.status(200).json(req.customer);
@@ -198,4 +229,5 @@ export {
   logoutCustomer,
   updateCustomerProfile,
   getCustomerProfilebyId,
+  changePassword,
 };

@@ -128,7 +128,7 @@ const updateUserProfile = asyncHandler(async (req, res) => {
       await user.save();
       res.status(200).json({
         message: "Profile Updated Succesfully",
-      }); 
+      });
     } else {
       return res.status(201).json({
         message: "No changes made",
@@ -153,6 +153,32 @@ const deleteUser = asyncHandler(async (req, res) => {
   }
 });
 
+const changePassword = asyncHandler(async (req, res) => {
+  const _id = req.user._id;
+
+  const { currentPassword, newPassword, confirmPassword } = req.body;
+
+  const user = await User.findById(_id);
+
+  if (user && (await user.matchPassword(currentPassword || ""))) {
+    if (newPassword) {
+      if (newPassword === confirmPassword) {
+        user.password = newPassword;
+        await user.save();
+        res.status(200).json({ message: "Password changed successfully" });
+      } else {
+        res.status(400);
+        throw new Error("new password and confirm password do not match");
+      }
+    } else {
+      throw new Error("Invalid Inputs");
+    }
+  } else {
+    res.status(401);
+    throw new Error("Invalid Old Password");
+  }
+});
+
 const getUserProfile = asyncHandler(async (req, res) => {
   try {
     res.status(200).json(req.user);
@@ -170,4 +196,5 @@ export {
   updateUserProfile,
   deleteUser,
   getUserProfile,
+  changePassword,
 };

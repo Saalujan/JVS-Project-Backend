@@ -9,6 +9,7 @@ import {
   logoutCustomer,
   updateCustomerProfile,
   getCustomerProfilebyId,
+  changePassword,
 } from "../controllers/customerController.js";
 
 const router = express.Router();
@@ -18,6 +19,7 @@ router.route("/auth").post(authCustomer);
 router.route("/logout").post(logoutCustomer);
 router.route("/").get(getAllCustomers);
 router.get("/currentcustomer", protect, getCustomerProfile);
+router.put("/changepassword",protect,changePassword);
 router.route("/:id").get(getCustomerProfilebyId).put(updateCustomerProfile);
 router.route("/:id").delete(deleteCustomer);
 
