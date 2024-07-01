@@ -1,6 +1,7 @@
 import jwt from "jsonwebtoken";
 import asyncHandler from "express-async-handler";
-import User from "../modals/userModal.js";
+import User from "../models/userModal.js";
+import Customer from "../models/customerModal.js";
 
 const protect = asyncHandler(async (req, res, next) => {
     const authHeader = req?.headers?.authorization;
@@ -14,6 +15,7 @@ const protect = asyncHandler(async (req, res, next) => {
         try {
             const decoded = jwt.verify(token, process.env.JWT_SECRET);
             req.user = await User.findById(decoded.userId).select("-password");
+            req.customer = await Customer.findById(decoded.userId).select("-password");
             next();
 
         } catch (error) {

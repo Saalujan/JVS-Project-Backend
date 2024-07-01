@@ -1,9 +1,10 @@
 import asyncHandler from "express-async-handler";
 import generateToken from "../utils/generateToken.js";
 import Customer from "../models/customerModal.js";
-import { sendAccountDeletionEmail, sendRegistrationEmail } from "../utils/customerMail.js";
-
-
+import {
+  sendAccountDeletionEmail,
+  sendRegistrationEmail,
+} from "../utils/customerMail.js";
 
 const registerCustomer = asyncHandler(async (req, res) => {
   const {
@@ -68,7 +69,7 @@ const getAllCustomers = asyncHandler(async (req, res) => {
   }
 });
 
-const getCustomerProfile = asyncHandler(async (req, res) => {
+const getCustomerProfilebyId = asyncHandler(async (req, res) => {
   try {
     let _id = req.params.id;
     const customer = await Customer.findById(_id);
@@ -95,8 +96,6 @@ const deleteCustomer = asyncHandler(async (req, res) => {
   }
 });
 
-
-
 const authCustomer = asyncHandler(async (req, res) => {
   const token = req.headers.authorization;
   const { username, password } = req.body;
@@ -114,20 +113,6 @@ const authCustomer = asyncHandler(async (req, res) => {
       return res.status(200).json({
         data: {
           token: token,
-          _id: customer._id,
-          fname: customer.fname,
-          lname: customer.lname,
-          email: customer.email,
-          password: customer.password,
-          profilePic: customer.profilePic,
-          dob: customer.dob,
-          address: customer.address,
-          nic: customer.nic,
-          gender: customer.gender,
-          phoneNo: customer.phoneNo,
-          city: customer.city,
-          role: customer.role,
-          description: customer.description,
         },
         message: "logged in successfully",
       });
@@ -142,16 +127,12 @@ const authCustomer = asyncHandler(async (req, res) => {
 });
 
 const logoutCustomer = asyncHandler(async (req, res) => {
-  res.cookie("jwt", null, {
+  res.cookie("jwt", "none", {
+    expires: new Date(Date.now() + 10 * 1000),
     httpOnly: true,
-    expires: new Date(0),
-    // secure: true,
-    // sameSite:'strict',
   });
-
-  res.status(200).json({ message: "Logout Successfully" });
+  res.status(200).json({ message: "Customer logged out successfully" });
 });
-
 
 const updateCustomerProfile = asyncHandler(async (req, res) => {
   const _id = req.params.id;
@@ -164,25 +145,34 @@ const updateCustomerProfile = asyncHandler(async (req, res) => {
 
   const originalCustomerData = { ...customer.toObject() };
   const updateFields = [
-    "fname", "lname", "email", "profilePic", "dob", "address",
-    "nic", "phoneNo", "city", "description"
+    "fname",
+    "lname",
+    "email",
+    "profilePic",
+    "dob",
+    "address",
+    "nic",
+    "phoneNo",
+    "city",
+    "description",
   ];
 
-  updateFields.forEach(field => {
+  updateFields.forEach((field) => {
     customer[field] = req.body[field] || customer[field];
   });
 
   if (req.body.password) {
     customer.password = req.body.password;
   }
-  
-  const isCustomerDataChanged = updateFields.some(key => customer[key] !== originalCustomerData[key]) || (req.body.password && req.body.password !== customer.password);
+
+  const isCustomerDataChanged =
+    updateFields.some((key) => customer[key] !== originalCustomerData[key]) ||
+    (req.body.password && req.body.password !== customer.password);
 
   if (isCustomerDataChanged) {
-    const updatedCustomer = await customer.save();
-    res.json({
-      data: { ...updatedCustomer.toObject() },
-      message: "Customer Updated Successfully",
+    await customer.save();
+    res.status(200).json({
+      message: "Profile Updated Succesfully",
     });
   } else {
     res.status(201).json({
@@ -191,6 +181,13 @@ const updateCustomerProfile = asyncHandler(async (req, res) => {
   }
 });
 
+const getCustomerProfile = asyncHandler(async (req, res) => {
+  try {
+    res.status(200).json(req.customer);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
 
 export {
   registerCustomer,
@@ -200,4 +197,5 @@ export {
   authCustomer,
   logoutCustomer,
   updateCustomerProfile,
+  getCustomerProfilebyId,
 };

@@ -23,14 +23,9 @@ const registerUser = asyncHandler(async (req, res) => {
 
   if (user) {
     generateToken(res, user._id);
-    res.status(201).json({
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-      role: user.role,
-      phoneNumber: user.phoneNumber,
-      profilePic: user.profilePic,
-      creationDate: user.creationDate,
+    res.status(200).json({
+      data: user,
+      message: "Registered Succesfully",
     });
   } else {
     res.status(401);
@@ -55,13 +50,6 @@ const authUser = asyncHandler(async (req, res) => {
       return res.status(200).json({
         data: {
           token: token,
-          _id: user._id,
-          name: user.name,
-          email: user.email,
-          phoneNumber: user.phoneNumber,
-          role: user.role,
-          profilePic: user.profilePic,
-          creationDate: user.creationDate,
         },
         message: "logged in successfully",
       });
@@ -76,14 +64,11 @@ const authUser = asyncHandler(async (req, res) => {
 });
 
 const logoutUser = asyncHandler(async (req, res) => {
-  res.cookie("jwt", null, {
+  res.cookie("jwt", "none", {
+    expires: new Date(Date.now() + 10 * 1000),
     httpOnly: true,
-    expires: new Date(0),
-    // secure: true,
-    // sameSite:'strict',
   });
-
-  res.status(200).json({ message: "Logout Successfully" });
+  res.status(200).json({ message: "User logged out successfully" });
 });
 
 const getAllUsers = asyncHandler(async (req, res) => {
@@ -99,7 +84,7 @@ const getAllUsers = asyncHandler(async (req, res) => {
   }
 });
 
-const getUserProfile = asyncHandler(async (req, res) => {
+const getUserProfilebyId = asyncHandler(async (req, res) => {
   try {
     let _id = req.params.id;
     const user = await User.findById(_id);
@@ -121,7 +106,7 @@ const updateUserProfile = asyncHandler(async (req, res) => {
       email: user.email,
       phoneNumber: user.phoneNumber,
       profilePic: user.profilePic,
-      password:user.password
+      password: user.password,
     };
 
     user.name = req.body.name || user.name;
@@ -134,23 +119,16 @@ const updateUserProfile = asyncHandler(async (req, res) => {
     }
 
     const isUserDataChanged =
-      Object.keys(originalUserData).some(key => user[key] !== originalUserData[key]) ||
+      Object.keys(originalUserData).some(
+        (key) => user[key] !== originalUserData[key]
+      ) ||
       (req.body.password && req.body.password !== user.password);
-      
-    if (isUserDataChanged) {
-      const updatedUser = await user.save();
 
-      res.json({
-        data: {
-          _id: updatedUser._id,
-          name: updatedUser.name,
-          email: updatedUser.email,
-          phoneNumber: updatedUser.phoneNumber,
-          profilePic: updatedUser.profilePic,
-          creationDate: user.creationDate,
-        },
-        message: "User Updated Succesfully",
-      });
+    if (isUserDataChanged) {
+      await user.save();
+      res.status(200).json({
+        message: "Profile Updated Succesfully",
+      }); 
     } else {
       return res.status(201).json({
         message: "No changes made",
@@ -175,16 +153,21 @@ const deleteUser = asyncHandler(async (req, res) => {
   }
 });
 
-
-
-
+const getUserProfile = asyncHandler(async (req, res) => {
+  try {
+    res.status(200).json(req.user);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
 
 export {
   registerUser,
   authUser,
   logoutUser,
   getAllUsers,
-  getUserProfile,
+  getUserProfilebyId,
   updateUserProfile,
   deleteUser,
+  getUserProfile,
 };
