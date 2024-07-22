@@ -13,7 +13,6 @@ const registerCustomer = asyncHandler(async (req, res) => {
     email,
     password,
     profilePic,
-    dob,
     address,
     nic,
     gender,
@@ -29,6 +28,8 @@ const registerCustomer = asyncHandler(async (req, res) => {
     res.status(400);
     throw new Error("Customer already exists");
   }
+
+   const dob = calculateDOBFromNIC(nic);
 
   const customer = await Customer.create({
     fname,
@@ -60,6 +61,28 @@ const registerCustomer = asyncHandler(async (req, res) => {
     throw new Error("Invalid user Data");
   }
 });
+
+const calculateDOBFromNIC = (nic) => {
+  let year, month, day;
+  if (nic.length === 10) {
+    year = "19" + nic.substring(0, 2);
+    let days = parseInt(nic.substring(2, 5));
+    if (days > 500) days -= 500;
+    const date = new Date(year, 0);
+    date.setDate(days);
+    month = (date.getMonth() + 1).toString().padStart(2, '0');
+    day = date.getDate().toString().padStart(2, '0');
+  } else if (nic.length === 12) {
+    year = nic.substring(0, 4);
+    let days = parseInt(nic.substring(4, 7));
+    if (days > 500) days -= 500;
+    const date = new Date(year, 0);
+    date.setDate(days);
+    month = (date.getMonth() + 1).toString().padStart(2, '0');
+    day = date.getDate().toString().padStart(2, '0');
+  }
+  return `${year}-${month}-${day}`;
+};
 
 const getAllCustomers = asyncHandler(async (req, res) => {
   try {
