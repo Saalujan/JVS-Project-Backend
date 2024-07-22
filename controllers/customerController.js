@@ -177,7 +177,6 @@ const updateCustomerProfile = asyncHandler(async (req, res) => {
     "lname",
     "email",
     "profilePic",
-    "dob",
     "address",
     "nic",
     "phoneNo",
@@ -191,6 +190,10 @@ const updateCustomerProfile = asyncHandler(async (req, res) => {
 
   if (req.body.password) {
     customer.password = req.body.password;
+  }
+  
+  if (req.body.nic) {
+    customer.dob = calculateDOBFromNIC(req.body.nic);
   }
 
   const isCustomerDataChanged =
