@@ -1,20 +1,34 @@
-import express from "express";
+import express from 'express';
 const router = express.Router();
-import { runChat } from "../controllers/chatController.js";
+import Chat from '../models/chatModel.js';
 
-router.post('/chat', async (req, res) => {
+router.post('/', async (req, res) => {
   try {
-    const userInput = req.body?.userInput;
-    console.log('incoming /chat req', userInput);
-    if (!userInput) {
-      return res.status(400).json({ error: 'Invalid request body' });
-    }
+    const { senderId, senderModel, receiverId, receiverModel, message } = req.body;
+    const newMessage = new Chat({ sender: senderId, senderModel, receiver: receiverId, receiverModel, message });
+    const savedMessage = await newMessage.save();
 
-    const response = await runChat(userInput);
-    res.json({ response });
+    // Emit the new message event
+    req.app.get('io').emit('message', savedMessage);
+
+    res.status(201).json(savedMessage);
   } catch (error) {
-    console.error('Error in chat endpoint:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    res.status(500).json({ message: error.message });
+  }
+});
+
+router.get('/:senderId/:senderModel/:receiverId/:receiverModel', async (req, res) => {
+  try {
+    const { senderId, senderModel, receiverId, receiverModel } = req.params;
+    const messages = await Chat.find({
+      $or: [
+        { sender: senderId, senderModel, receiver: receiverId, receiverModel },
+        { sender: receiverId, senderModel: receiverModel, receiver: senderId, receiverModel: senderModel },
+      ],
+    }).exec();
+    res.status(200).json(messages);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 });
 

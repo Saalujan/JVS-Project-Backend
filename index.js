@@ -14,6 +14,8 @@ import employeeRoutes from "./routes/employeeRoutes.js";
 import purchaseRoutes from "./routes/purchaseRoutes.js";
 import auctionRoutes from "./routes/auctionRoutes.js";
 import chatRoutes from "./routes/chatRoutes.js";
+import http from 'http';
+import { Server } from 'socket.io';
 
 dotenv.config();
 connectDB();
@@ -33,10 +35,35 @@ app.use("/api/content", contentRoutes);
 app.use("/api/employees", employeeRoutes);
 app.use("/api/purchase", purchaseRoutes);
 app.use("/api/auction", auctionRoutes);
-app.use("/api/", chatRoutes);
+app.use("/api/chats", chatRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
+
+const server = http.createServer(app);
+
+// Initialize Socket.io
+const io = new Server(server, {
+  cors: {
+    origin: '*', // Adjust according to your requirements
+  },
+});
+
+// Socket.io connection
+io.on('connection', (socket) => {
+  console.log('New client connected');
+
+  socket.on('sendMessage', (message) => {
+    io.emit('message', message);
+  });
+
+  socket.on('disconnect', () => {
+    console.log('Client disconnected');
+  });
+});
+
+// Attach io to app for access in routes
+app.set('io', io);
 
 app.get("/", (req, res) => {
   res.send("Server is ready");
