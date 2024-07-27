@@ -2,6 +2,7 @@ import jwt from "jsonwebtoken";
 import asyncHandler from "express-async-handler";
 import User from "../models/userModal.js";
 import Customer from "../models/customerModal.js";
+import Employee from "../models/employeeModel.js";
 
 const protect = asyncHandler(async (req, res, next) => {
     const authHeader = req?.headers?.authorization;
@@ -16,6 +17,7 @@ const protect = asyncHandler(async (req, res, next) => {
             const decoded = jwt.verify(token, process.env.JWT_SECRET);
             req.user = await User.findById(decoded.userId).select("-password");
             req.customer = await Customer.findById(decoded.userId).select("-password");
+            req.employee = await Employee.findById(decoded.userId).select("-password");
             next();
 
         } catch (error) {

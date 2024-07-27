@@ -14,6 +14,7 @@ import employeeRoutes from "./routes/employeeRoutes.js";
 import purchaseRoutes from "./routes/purchaseRoutes.js";
 import auctionRoutes from "./routes/auctionRoutes.js";
 import chatRoutes from "./routes/chatRoutes.js";
+import expertchatRoutes from "./routes/expertchatRoutes.js";
 import http from 'http';
 import { Server } from 'socket.io';
 
@@ -36,6 +37,7 @@ app.use("/api/employees", employeeRoutes);
 app.use("/api/purchase", purchaseRoutes);
 app.use("/api/auction", auctionRoutes);
 app.use("/api/chats", chatRoutes);
+app.use("/api/expertchats", expertchatRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
