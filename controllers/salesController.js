@@ -2,6 +2,7 @@ import asyncHandler from "express-async-handler";
 import Customer from "../models/customerModal.js";
 import Vehicle from "../models/vehicleModal.js";
 import Sales from "../models/saleModel.js";
+import Records from "../models/recordsModel.js";
 
 const addSales = asyncHandler(async (req, res) => {
   const { price, email, registerno, status, description, documents } = req.body;
@@ -31,10 +32,14 @@ const addSales = asyncHandler(async (req, res) => {
     description,
     documents,
   });
+  const records = await Records.create({
+    customerId: customer._id,
+    vehicleId: vehicle._id,
+    status,
+  });
 
-  if (sales) {
+  if (sales && records) {
     res.status(200).json({
-      data: sales,
       message: "Sales added Sucessfully",
     });
   } else {
@@ -69,7 +74,6 @@ const deleteSales = asyncHandler(async (req, res) => {
   }
 });
 
-
 const updateSales = asyncHandler(async (req, res) => {
   const { id } = req.params;
   const sales = await Sales.findById(id);
@@ -87,4 +91,5 @@ const updateSales = asyncHandler(async (req, res) => {
   }
 });
 
-export { addSales, getAllSales, deleteSales,updateSales };
+
+export { addSales, getAllSales, deleteSales, updateSales };
