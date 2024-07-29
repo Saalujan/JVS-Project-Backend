@@ -59,17 +59,10 @@ const authEmployee = asyncHandler(async (req, res) => {
     const employee = await Employee.findOne({ email: username });
 
     if (employee && (await employee.matchPassword(password))) {
-      let token = generateToken(res, user._id);
+      let token = generateToken(res, employee._id);
       return res.status(200).json({
         data: {
           token: token,
-          _id: employee._id,
-          name: employee.name,
-          email: employee.email,
-          phoneNumber: employee.phoneNumber,
-          role: employee.role,
-          profilePic: employee.profilePic,
-          creationDate: employee.creationDate,
         },
         message: "logged in successfully",
       });
@@ -185,6 +178,14 @@ const deleteEmployee = asyncHandler(async (req, res) => {
   }
 });
 
+const getEmployeeInfo = asyncHandler(async (req, res) => {
+  try {
+    res.status(200).json(req.employee);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 export {
   registerEmployee,
   authEmployee,
@@ -193,4 +194,5 @@ export {
   getEmployeeProfile,
   updateEmployeeProfile,
   deleteEmployee,
+  getEmployeeInfo,
 };
