@@ -113,6 +113,8 @@ const getEmployeeProfile = asyncHandler(async (req, res) => {
   }
 });
 
+
+
 const updateEmployeeProfile = asyncHandler(async (req, res) => {
   let _id = req.params.id;
   const employee = await Employee.findById(_id);
@@ -135,24 +137,15 @@ const updateEmployeeProfile = asyncHandler(async (req, res) => {
     }
 
     const isEmployeeDataChanged =
-      Object.keys(originalEmployeeData).some(
-        (key) => employee[key] !== originalEmployeeData[key]
+      Object.keys(originalUserData).some(
+        (key) => employee[key] !== originalUserData[key]
       ) ||
       (req.body.password && req.body.password !== employee.password);
 
     if (isEmployeeDataChanged) {
-      const updatedEmployee = await employee.save();
-
-      res.json({
-        data: {
-          _id: updatedEmployee._id,
-          name: updatedEmployee.name,
-          email: updatedEmployee.email,
-          phoneNumber: updatedEmployee.phoneNumber,
-          profilePic: updatedEmployee.profilePic,
-          creationDate: updatedEmployee.creationDate,
-        },
-        message: "Employee Updated Succesfully",
+      await employee.save();
+      res.status(200).json({
+        message: "Profile Updated Succesfully",
       });
     } else {
       return res.status(201).json({
@@ -186,6 +179,32 @@ const getEmployeeInfo = asyncHandler(async (req, res) => {
   }
 });
 
+const changeEmployeePassword = asyncHandler(async (req, res) => {
+  const _id = req.employee._id;
+
+  const { currentPassword, newPassword, confirmPassword } = req.body;
+
+  const employee = await Employee.findById(_id);
+
+  if (employee && (await employee.matchPassword(currentPassword || ""))) {
+    if (newPassword) {
+      if (newPassword === confirmPassword) {
+        employee.password = newPassword;
+        await employee.save();
+        res.status(200).json({ message: "Password changed successfully" });
+      } else {
+        res.status(400);
+        throw new Error("new password and confirm password do not match");
+      }
+    } else {
+      throw new Error("Invalid Inputs");
+    }
+  } else {
+    res.status(401);
+    throw new Error("Invalid Old Password");
+  }
+});
+
 export {
   registerEmployee,
   authEmployee,
@@ -195,4 +214,5 @@ export {
   updateEmployeeProfile,
   deleteEmployee,
   getEmployeeInfo,
+  changeEmployeePassword
 };
