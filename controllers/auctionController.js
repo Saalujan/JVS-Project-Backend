@@ -98,17 +98,48 @@ const updateAuction = asyncHandler(async (req, res) => {
 
     const customer = await Customer.findById(customerId);
     if (customer) {
-      await sendBiddingConfirmEmail(customer.email, customer.fname,biddingprice);
+      await sendBiddingConfirmEmail(
+        customer.email,
+        customer.fname,
+        biddingprice
+      );
     }
 
     const updatedAuction = await auction.save();
     res.status(200).json({
       data: updatedAuction,
-      message: "Auction bid Update Successfully"
+      message: "Auction bid Update Successfully",
     });
   } else {
     res.status(404);
     throw new Error("Auction not found");
+  }
+});
+
+const deleteBidFromAuction = asyncHandler(async (req, res) => {
+  try {
+    const { auctionId, bidId } = req.params;
+
+    const auction = await Auction.findById(auctionId);
+    if (!auction) {
+      return res.status(404).json({ message: "Auction not found" });
+    }
+
+    const bidIndex = auction.biddinghistory.findIndex(
+      (bid) => bid._id.toString() === bidId
+    );
+    if (bidIndex === -1) {
+      return res.status(404).json({ message: "Bid not found" });
+    }
+
+    auction.biddinghistory.splice(bidIndex, 1);
+
+    await auction.save();
+
+    res.status(200).json({ message: "Bid removed successfully" });
+  } catch (error) {
+    console.error("Failed to delete bid from auction:", error);
+    res.status(500).json({ message: error.message });
   }
 });
 
@@ -118,4 +149,5 @@ export {
   deleteAuction,
   auctionInfo,
   updateAuction,
+  deleteBidFromAuction,
 };

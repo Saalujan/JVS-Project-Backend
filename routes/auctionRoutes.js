@@ -3,6 +3,7 @@ import {
   addAuction,
   auctionInfo,
   deleteAuction,
+  deleteBidFromAuction,
   getAllAuctions,
   updateAuction,
 } from "../controllers/auctionController.js";
@@ -14,5 +15,6 @@ router.route("/").get(getAllAuctions);
 router.route("/:id").delete(deleteAuction);
 router.route("/:id").get(auctionInfo);
 router.route("/:id").put(updateAuction);
+router.delete('/:auctionId/bid/:bidId', deleteBidFromAuction);
 
 export default router;
