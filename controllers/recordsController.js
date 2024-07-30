@@ -20,9 +20,7 @@ const getAllRecordsByID = asyncHandler(async (req, res) => {
     const records = await Records.findById(_id).populate("vehicleId");
 
     if (!records) {
-      return res
-        .status(404)
-        .json({ message: "No records found." });
+      return res.status(404).json({ message: "No records found." });
     }
 
     res.status(200).json(records);
@@ -31,7 +29,6 @@ const getAllRecordsByID = asyncHandler(async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 });
-
 
 const getRecordByCustomerID = asyncHandler(async (req, res) => {
   try {
@@ -53,27 +50,45 @@ const getRecordByCustomerID = asyncHandler(async (req, res) => {
 });
 
 const updateRecordHistory = asyncHandler(async (req, res) => {
-    const { id } = req.params;
-    const { content, details, documents } = req.body;
-  
-    const record = await Records.findById(id);
-  
-    if (record) {
-      record.recordhistory.push({
-        content: content || "",
-        details: details || "",
-        documents: documents || [],
-      });
-  
-      const updatedRecord = await record.save();
-      res.status(200).json({
-        data: updatedRecord,
-        message: "Record history updated successfully",
-      });
-    } else {
-      res.status(404);
-      throw new Error("Record not found");
-    }
-  });
+  const { id } = req.params;
+  const { content, details, documents } = req.body;
 
-export { getAllRecords, getRecordByCustomerID, getAllRecordsByID,updateRecordHistory };
+  const record = await Records.findById(id);
+
+  if (record) {
+    record.recordhistory.push({
+      content: content || "",
+      details: details || "",
+      documents: documents || [],
+    });
+
+    const updatedRecord = await record.save();
+    res.status(200).json({
+      data: updatedRecord,
+      message: "Record history updated successfully",
+    });
+  } else {
+    res.status(404);
+    throw new Error("Record not found");
+  }
+});
+
+const deleteRecord = asyncHandler(async (req, res) => {
+  try {
+    const { id } = req.params;
+    const record = await Records.findByIdAndDelete(id);
+    if (!record) {
+      return res.status(404).json({ message: "Records not Found !" });
+    }
+    res.status(200).json({ message: "Records Detail Deleted Successfully !" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+export {
+  getAllRecords,
+  getRecordByCustomerID,
+  getAllRecordsByID,
+  updateRecordHistory,
+  deleteRecord,
+};

@@ -36,6 +36,7 @@ const addSales = asyncHandler(async (req, res) => {
     customerId: customer._id,
     vehicleId: vehicle._id,
     status,
+    description,
   });
 
   if (sales && records) {
@@ -90,6 +91,5 @@ const updateSales = asyncHandler(async (req, res) => {
     throw new Error("Sales not found");
   }
 });
-
 
 export { addSales, getAllSales, deleteSales, updateSales };
