@@ -85,10 +85,38 @@ const deleteRecord = asyncHandler(async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 });
+
+const deleteRecordsHistory = asyncHandler(async (req, res) => {
+  try {
+    const { recordId, historyId } = req.params;
+
+    const record = await Records.findById(recordId);
+    if (!record) {
+      return res.status(404).json({ message: "Record not found" });
+    }
+
+    const historyIndex = record.recordhistory.findIndex(
+      (bid) => bid._id.toString() === historyId
+    );
+    if (historyIndex === -1) {
+      return res.status(404).json({ message: "Bid not found" });
+    }
+
+    record.recordhistory.splice(historyIndex, 1);
+
+    await record.save();
+
+    res.status(200).json({ message: "Record removed successfully" });
+  } catch (error) {
+    console.error("Failed to delete Record", error);
+    res.status(500).json({ message: error.message });
+  }
+});
 export {
   getAllRecords,
   getRecordByCustomerID,
   getAllRecordsByID,
   updateRecordHistory,
   deleteRecord,
+  deleteRecordsHistory,
 };
