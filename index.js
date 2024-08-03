@@ -16,6 +16,7 @@ import auctionRoutes from "./routes/auctionRoutes.js";
 import chatRoutes from "./routes/chatRoutes.js";
 import expertchatRoutes from "./routes/expertchatRoutes.js";
 import recordsRoutes from "./routes/recordsRoutes.js";
+import aichatRoutes from "./routes/aichatRoutes.js";
 import http from 'http';
 import { Server } from 'socket.io';
 
@@ -40,6 +41,7 @@ app.use("/api/auction", auctionRoutes);
 app.use("/api/chats", chatRoutes);
 app.use("/api/expertchats", expertchatRoutes);
 app.use("/api/records", recordsRoutes);
+app.use("/api/", aichatRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
