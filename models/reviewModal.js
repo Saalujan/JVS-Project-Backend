@@ -7,11 +7,6 @@ const reviewSchema = mongoose.Schema(
       ref: "Customer",
       required: true,
     },
-    vehicleId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Vehicle",
-      required: true,
-    },
     review: {
       type: String,
       required: true,

@@ -7,7 +7,6 @@ const getAllReviews = asyncHandler(async (req, res) => {
   try {
     const reviews = await Review.find({})
       .populate({ path: "customerId", model: "Customer" })
-      .populate({ path: "vehicleId", model: "Vehicle" });
     if (reviews.length === 0) {
       return res.status(404).json({ message: "Reviews Details is Empty !" });
     }
@@ -19,7 +18,7 @@ const getAllReviews = asyncHandler(async (req, res) => {
 });
 
 const addReview = asyncHandler(async (req, res) => {
-  const { registerno, status, review, ratings } = req.body;
+  const { status, review, ratings } = req.body;
 
   const _id = req.customer._id;
   console.log(_id,"idddd");
@@ -29,19 +28,11 @@ const addReview = asyncHandler(async (req, res) => {
     res.status(404);
     throw new Error("Customer not found");
   }
-
-  const vehicle = await Vehicle.findOne({ registerno });
-
-  if (!vehicle) {
-    res.status(404);
-    throw new Error("Vehicle not found");
-  }
   
 
   const reviews = await Review.create({
     review,
     customerId: customer._id,
-    vehicleId: vehicle._id,
     status,
     ratings,
   });
