@@ -53,22 +53,27 @@ const server = http.createServer(app);
 // Initialize Socket.io
 const io = new Server(server, {
   cors: {
-    origin: '*', // Adjust according to your requirements
+    origin: '*',
   },
+  path: '/socket.io',
 });
 
 // Socket.io connection
+// Socket.io connection
 io.on('connection', (socket) => {
-  console.log('New client connected');
+  console.log(`New client connected: ${socket.id}`); // Confirm the connection
 
+  // Listen for 'sendMessage' event and broadcast the message
   socket.on('sendMessage', (message) => {
     io.emit('message', message);
   });
 
+  // Listen for disconnection event
   socket.on('disconnect', () => {
-    console.log('Client disconnected');
+    console.log(`Client disconnected: ${socket.id}`);
   });
 });
+
 
 // Attach io to app for access in routes
 app.set('io', io);
